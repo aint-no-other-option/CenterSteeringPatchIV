@@ -8,3 +8,5 @@ Build as Release x86. Requires nothing else but an ASI loader. Not even ScriptHo
 Huge shout out to Zolika for narrowing down a lot of memory offsets and documenting it publicly.
 
 ![alt text](https://i.ibb.co/3hzLtdw/Grand-Theft-Auto-4-Screenshot-2023-12-25-23-58-13-48.png)
+
+https://gtaforums.com/topic/994773-iv-center-steer-patch-20/
