@@ -30,7 +30,7 @@ version of the game you have. I'll add 1.0.4.0 at some point. */
 #endif
 
 #define VER_MAX 2
-#define VER_MIN 0
+#define VER_MIN 1
 
 #define MOD_NAME "CenterSteeringPatchIV.asi"
 #define LOG_NAME "CenterSteeringPatchIV.log"
@@ -357,7 +357,13 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (addr != 0)
 		{
 			writeLog("Info", "Found engine-off exit address 1! Patching...");
+			DWORD oldProt;
+			if (!VirtualProtect((void*)(addr + 7 + 7), 8, PAGE_EXECUTE_READWRITE, &oldProt))
+				writeLog("Error", "Couldn't change mem protection ENTRY");
 			memset((void*)(addr + 7 + 7), 0x90, 8);
+			DWORD newProt;
+			if (!VirtualProtect((void*)(addr + 7 + 7), 8, oldProt, &newProt))
+				writeLog("Error", "Couldn't change mem protection EXIT");
 			writeLog("Info", "Success!");
 		}
 		else
@@ -370,7 +376,13 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (addr != 0)
 		{
 			writeLog("Info", "Found engine-off exit address 2! Patching...");
+			DWORD oldProt;
+			if (!VirtualProtect((void*)(addr + 5 + 7), 8, PAGE_EXECUTE_READWRITE, &oldProt))
+				writeLog("Error", "Couldn't change mem protection ENTRY");
 			memset((void*)(addr + 5 + 7), 0x90, 8);
+			DWORD newProt;
+			if (!VirtualProtect((void*)(addr + 5 + 7), 8, oldProt, &newProt))
+				writeLog("Error", "Couldn't change mem protection EXIT");
 			writeLog("Info", "Success!");
 		}
 		else
@@ -385,7 +397,13 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (addr != 0)
 		{
 			writeLog("Info", "Found exit address 1! Patching...");
+			DWORD oldProt;
+			if (!VirtualProtect((void*)(addr + 2), 10, PAGE_EXECUTE_READWRITE, &oldProt))
+				writeLog("Error", "Couldn't change mem protection ENTRY");
 			memset((void*)(addr + 2), 0x90, 10);
+			DWORD newProt;
+			if (!VirtualProtect((void*)(addr + 2), 10, oldProt, &newProt))
+				writeLog("Error", "Couldn't change mem protection EXIT");
 			writeLog("Info", "Success!");
 		}
 		else
@@ -398,7 +416,13 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (addr != 0)
 		{
 			writeLog("Info", "Found exit address 2! Patching...");
+			DWORD oldProt;
+			if (!VirtualProtect((void*)(addr + 11), 10, PAGE_EXECUTE_READWRITE, &oldProt))
+				writeLog("Error", "Couldn't change mem protection ENTRY");
 			memset((void*)(addr + 11), 0x90, 10);
+			DWORD newProt;
+			if (!VirtualProtect((void*)(addr + 11), 10, oldProt, &newProt))
+				writeLog("Error", "Couldn't change mem protection EXIT");
 			writeLog("Info", "Success!");
 		}
 		else
