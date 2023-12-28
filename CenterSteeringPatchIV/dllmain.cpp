@@ -29,8 +29,8 @@ version of the game you have. I'll add 1.0.4.0 at some point. */
 #define COMPILE_VER "Complete Edition"
 #endif
 
-#define VER_MAX 2
-#define VER_MIN 1
+#define VER_MAX 3
+#define VER_MIN 0
 
 #define MOD_NAME "CenterSteeringPatchIV.asi"
 #define LOG_NAME "CenterSteeringPatchIV.log"
@@ -139,6 +139,29 @@ ULONG_PTR findPattern(const char* szPattern, const char* szMask)
 		writeLog("Error", "GetModuleInformation() failed! [%d]", GetLastError());
 
 	return 0;
+}
+
+bool patchAddress(uint32_t addr, uint32_t offset, uint32_t len)
+{
+	bool bRet = true;
+	DWORD oldProt;
+	DWORD newProt;
+
+	if (!VirtualProtect((void*)(addr + offset), len, PAGE_EXECUTE_READWRITE, &oldProt))
+	{
+		writeLog("Error", "Couldn't change mem protection ENTRY");
+		bRet = false;
+	}
+
+	memset((void*)(addr + offset), 0x90, len);
+	
+	if (!VirtualProtect((void*)(addr + offset), len, oldProt, &newProt))
+	{
+		writeLog("Error", "Couldn't change mem protection EXIT");
+		bRet = false;
+	}
+
+	return bRet;
 }
 
 void wheelCheck1()
@@ -357,14 +380,10 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (addr != 0)
 		{
 			writeLog("Info", "Found engine-off exit address 1! Patching...");
-			DWORD oldProt;
-			if (!VirtualProtect((void*)(addr + 7 + 7), 8, PAGE_EXECUTE_READWRITE, &oldProt))
-				writeLog("Error", "Couldn't change mem protection ENTRY");
-			memset((void*)(addr + 7 + 7), 0x90, 8);
-			DWORD newProt;
-			if (!VirtualProtect((void*)(addr + 7 + 7), 8, oldProt, &newProt))
-				writeLog("Error", "Couldn't change mem protection EXIT");
-			writeLog("Info", "Success!");
+			if (patchAddress(addr, 14, 8))
+			{
+				writeLog("Info", "Success!");
+			}
 		}
 		else
 		{
@@ -376,14 +395,55 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (addr != 0)
 		{
 			writeLog("Info", "Found engine-off exit address 2! Patching...");
-			DWORD oldProt;
-			if (!VirtualProtect((void*)(addr + 5 + 7), 8, PAGE_EXECUTE_READWRITE, &oldProt))
-				writeLog("Error", "Couldn't change mem protection ENTRY");
-			memset((void*)(addr + 5 + 7), 0x90, 8);
-			DWORD newProt;
-			if (!VirtualProtect((void*)(addr + 5 + 7), 8, oldProt, &newProt))
-				writeLog("Error", "Couldn't change mem protection EXIT");
-			writeLog("Info", "Success!");
+			if (patchAddress(addr, 12, 8))
+			{
+				writeLog("Info", "Success!");
+			}
+		}
+		else
+		{
+			writeLog("Error", "Couldn't find address!");
+		}
+
+		/* Bikes 1 */
+		addr = findPattern("\x50\x8B\xCE\xF3\x0F\x11\x86\xCC\x10\x00\x00\xF3\x0F\x11\x86\xD8\x10\x00\x00", "xxxxxxxxxxxxxxxxxxx");
+		if (addr != 0)
+		{
+			writeLog("Info", "Found engine-off exit bike address 1! Patching...");
+			if (patchAddress(addr, 11, 8))
+			{
+				writeLog("Info", "Success!");
+			}
+		}
+		else
+		{
+			writeLog("Error", "Couldn't find address!");
+		}
+
+		/* Bikes 2 */
+		addr = findPattern("\x76\x03\x0F\x28\xC2\xF3\x0F\x59\x05\x00\x00\x00\x00\xF3\x0F\x11\x86\xD8\x10\x00\x00", "xxxxxxxxx????xxxxxxxx");
+		if (addr != 0)
+		{
+			writeLog("Info", "Found engine-off exit bike address 2! Patching...");
+			if (patchAddress(addr, 13, 8))
+			{
+				writeLog("Info", "Success!");
+			}
+		}
+		else
+		{
+			writeLog("Error", "Couldn't find address!");
+		}
+
+		/* Bikes 3 (some weird useless code that sets bike steering to 0 for like 1 frame, thanks Rockstar */
+		addr = findPattern("\xEB\x13\x0F\x57\xC0\xF3\x0F\x11\x86\xD8\x10\x00\x00\xF3\x0F\x11\x86\x54\x14\x00\x00", "xxxxxxxxxxxxxxxxxxxxx");
+		if (addr != 0)
+		{
+			writeLog("Info", "Found entry bike address! Patching...");
+			if (patchAddress(addr, 5, 8))
+			{
+				writeLog("Info", "Success!");
+			}
 		}
 		else
 		{
@@ -397,14 +457,10 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (addr != 0)
 		{
 			writeLog("Info", "Found exit address 1! Patching...");
-			DWORD oldProt;
-			if (!VirtualProtect((void*)(addr + 2), 10, PAGE_EXECUTE_READWRITE, &oldProt))
-				writeLog("Error", "Couldn't change mem protection ENTRY");
-			memset((void*)(addr + 2), 0x90, 10);
-			DWORD newProt;
-			if (!VirtualProtect((void*)(addr + 2), 10, oldProt, &newProt))
-				writeLog("Error", "Couldn't change mem protection EXIT");
-			writeLog("Info", "Success!");
+			if (patchAddress(addr, 2, 10))
+			{
+				writeLog("Info", "Success!");
+			}
 		}
 		else
 		{
@@ -416,14 +472,55 @@ BOOL WINAPI DllMain(HINSTANCE hInst, DWORD reason, LPVOID)
 		if (addr != 0)
 		{
 			writeLog("Info", "Found exit address 2! Patching...");
-			DWORD oldProt;
-			if (!VirtualProtect((void*)(addr + 11), 10, PAGE_EXECUTE_READWRITE, &oldProt))
-				writeLog("Error", "Couldn't change mem protection ENTRY");
-			memset((void*)(addr + 11), 0x90, 10);
-			DWORD newProt;
-			if (!VirtualProtect((void*)(addr + 11), 10, oldProt, &newProt))
-				writeLog("Error", "Couldn't change mem protection EXIT");
-			writeLog("Info", "Success!");
+			if (patchAddress(addr, 11, 10))
+			{
+				writeLog("Info", "Success!");
+			}
+		}
+		else
+		{
+			writeLog("Error", "Couldn't find address!");
+		}
+
+		/* Bikes 1 */
+		addr = findPattern("\x51\x8B\xCE\xC7\x86\x7C\x10\x00\x00\x00\x00\x00\x00\xC7\x86\x88\x10\x00\x00\x00\x00\x00\x00", "xxxxxxxxxxxxxxxxxxxxxxx");
+		if (addr != 0)
+		{
+			writeLog("Info", "Found exit bike address 1! Patching...");
+			if (patchAddress(addr, 13, 10))
+			{
+				writeLog("Info", "Success!");
+			}
+		}
+		else
+		{
+			writeLog("Error", "Couldn't find address!");
+		}
+
+		/* Bikes 2 */
+		addr = findPattern("\x0F\x28\xC1\xF3\x0F\x59\x05\x00\x00\x00\x00\xF3\x0F\x11\x86\x88\x10\x00\x00\x24\x7F\xC7\x86", "xxxxxxx????xxxxxxxxxxxx");
+		if (addr != 0)
+		{
+			writeLog("Info", "Found exit bike address 2! Patching...");
+			if (patchAddress(addr, 11, 8))
+			{
+				writeLog("Info", "Success!");
+			}
+		}
+		else
+		{
+			writeLog("Error", "Couldn't find address!");
+		}
+
+		/* Bikes 3 (1 frame reset) */
+		addr = findPattern("\x74\x1B\xE8\x00\x00\x00\x00\xEB\x14\xC7\x86\x88\x10\x00\x00\x00\x00\x00\x00\xC7\x86\x04\x14", "xxx????xxxxxxxxxxxxxxxx");
+		if (addr != 0)
+		{
+			writeLog("Info", "Found entry bike address! Patching...");
+			if (patchAddress(addr, 9, 10))
+			{
+				writeLog("Info", "Success!");
+			}
 		}
 		else
 		{
