@@ -1,4 +1,4 @@
-# CenterSteeringPatchIV
+# CenterSteeringPatchIV 3.0
 A patch for GTA IV to get rid of the game centering your steering after exiting a vehicle
 
 Supports 1.0.7.0, 1.0.8.0, and CE (latest Steam version). Works on EFLC as well, I tested TBOGT.
